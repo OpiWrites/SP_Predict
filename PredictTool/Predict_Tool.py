@@ -24,6 +24,6 @@ list_of_files = sorted(list_of_files,
                        )
 for file in list_of_files:
     input()
-    print(file)
+    print(file.name)
     PredictLive(file)
     os.remove(file)

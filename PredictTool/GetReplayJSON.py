@@ -11,7 +11,7 @@ def GetJSON(directory, json_directory):
                         )
     iteration = 1
     for file in list_of_files:
-        filepath = directory + "/" + file
+        filepath = directory / file
         print(file)
         upload_file = open(filepath, 'rb')
         response = requests.post(url, files={'file': upload_file})
@@ -25,7 +25,7 @@ def GetJSON(directory, json_directory):
         timestamp = response_json
         if '/steam' in spy:
             spy = spy[:-6]
-        dumpfile = json_directory + "/" + "game" + str(iteration)
+        dumpfile = json_directory / ("game" + str(iteration))
         with open(dumpfile, 'w') as outfile:
             json.dump(response_json, outfile)
         iteration += 1

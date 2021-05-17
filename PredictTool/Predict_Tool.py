@@ -1,22 +1,29 @@
-from GetReplayJSON import GetJSON
-from predict_live import get_prediction
-from predict_live import encode_missing_variables
-from predict_live import PredictLive
-from CompileGamestates import CompileGamestatesToDataframe
-import sys
+from pathlib import Path
 import os
-import time
 
-GetJSON('Replays Folder', 'Quadruple Agent')
+from GetReplayJSON import GetJSON
+from predict_live import PredictLive
 
-list_of_files = filter(lambda x: os.path.isfile(os.path.join('Quadruple Agent', x)),
-                       os.listdir('Quadruple Agent'))
-list_of_files = sorted( list_of_files,
-                        key = lambda x: os.path.getmtime(os.path.join('Quadruple Agent', x))
-                        )
+CODE_FOLDER = Path(__file__).parent
+
+REPLAYS_FOLDER = CODE_FOLDER / 'Replays Folder'
+QUADRUPLE_AGENT_FOLDER = CODE_FOLDER / 'Quadruple Agent'
+
+if not REPLAYS_FOLDER.exists():
+    REPLAYS_FOLDER.mkdir()
+
+if not QUADRUPLE_AGENT_FOLDER.exists():
+    QUADRUPLE_AGENT_FOLDER.mkdir()
+
+GetJSON(REPLAYS_FOLDER, QUADRUPLE_AGENT_FOLDER)
+
+list_of_files = filter(lambda x: os.path.isfile(x),
+                       QUADRUPLE_AGENT_FOLDER.iterdir())
+list_of_files = sorted(list_of_files,
+                       key=lambda x: os.path.getmtime(x)
+                       )
 for file in list_of_files:
     input()
-    print(file)
+    print(file.name)
     PredictLive(file)
-    filepath = 'Quadruple Agent/' + file
-    os.remove(filepath)
+    os.remove(file)

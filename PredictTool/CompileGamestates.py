@@ -199,8 +199,7 @@ def CompileGamestates(directory):
 def CompileGamestatesToDataframe(file):
     gamestateList = []
 
-    filepath = 'Quadruple Agent' + "/" + file
-    valid, timelineList, timelineJSON = GetTimeline(filepath)
+    valid, timelineList, timelineJSON = GetTimeline(file)
     if valid == True:
         guest_list = {}
         hl_count = 0

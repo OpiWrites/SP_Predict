@@ -1,11 +1,6 @@
 from GetReplayJSON import GetJSON
-from predict_live import get_prediction
-from predict_live import encode_missing_variables
 from predict_live import PredictLive
-from CompileGamestates import CompileGamestatesToDataframe
-import sys
 import os
-import time
 
 GetJSON('Replays Folder', 'Quadruple Agent')
 

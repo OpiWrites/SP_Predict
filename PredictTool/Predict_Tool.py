@@ -17,14 +17,13 @@ if not QUADRUPLE_AGENT_FOLDER.exists():
 
 GetJSON(REPLAYS_FOLDER, QUADRUPLE_AGENT_FOLDER)
 
-list_of_files = filter(lambda x: os.path.isfile(QUADRUPLE_AGENT_FOLDER / x),
+list_of_files = filter(lambda x: os.path.isfile(x),
                        QUADRUPLE_AGENT_FOLDER.iterdir())
 list_of_files = sorted(list_of_files,
-                       key=lambda x: os.path.getmtime(QUADRUPLE_AGENT_FOLDER / x)
+                       key=lambda x: os.path.getmtime(x)
                        )
 for file in list_of_files:
     input()
     print(file)
     PredictLive(file)
-    filepath = 'Quadruple Agent/' + file
-    os.remove(filepath)
+    os.remove(file)

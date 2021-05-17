@@ -1,13 +1,14 @@
 from CompileGamestates import CompileGamestatesToDataframe
+from pathlib import Path
 import pickle
-import pandas as pd
-import numpy as np
 from time import time
-import sklearn
+
+CODE_FOLDER = Path(__file__).parent
+
 def get_prediction(gamestate):
-    with open('sp_predict.pkl', 'rb') as pickler:
+    with open(CODE_FOLDER / 'sp_predict.pkl', 'rb') as pickler:
         sp_predict = pickle.load(pickler)
-    with open('predict_scaler.pkl', 'rb') as pickler:
+    with open(CODE_FOLDER / 'predict_scaler.pkl', 'rb') as pickler:
         scaler = pickle.load(pickler)
     gamestate_data = gamestate[["bug_avail", "da_avail", "swap_avail", "inspect_avail", "seduce_avail", "purloin_avail", "fp_avail",
                                             "micro_avail", "guest_count", "reqmissions",

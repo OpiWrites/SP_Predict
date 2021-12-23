@@ -3,10 +3,14 @@ import json
 import pandas as pd
 import numpy as np
 import os
+
+
 validvenues = ["Aquarium", "Balcony", "Ballroom", "Courtyard", "Gallery", "High-Rise", "Library", "Moderne",
-          "Pub", "Redwoods", "Teien", "Terrace", "Veranda"]
+               "Pub", "Redwoods", "Teien", "Terrace", "Veranda"]
 cast_list = ['Ambassador', 'SuspectedDoubleAgent', 'Toby', 'Damon', 'Double Agent']
 balc_cast_list = ['Ambassador', 'SuspectedDoubleAgent', 'Toby', 'Damon']
+
+
 def GetTimeline(file):
     timelineJSON = {'guest_count': None}
     try:
@@ -21,11 +25,12 @@ def GetTimeline(file):
         print('failed to load game')
         print(file)
     timelineList = []
-    if timelineJSON["guest_count"] != None:
+    if timelineJSON["guest_count"] is not None:
         valid = True
         for event in timelineJSON['timeline']:
             timelineList.append(event)
     return valid, timelineList, timelineJSON
+
 
 def CompileGamestates(directory):
     count = 0
@@ -34,7 +39,7 @@ def CompileGamestates(directory):
     for file in os.listdir(directory):
         filepath = directory + "/" + file
         valid, timelineList, timelineJSON = GetTimeline(filepath)
-        if valid == True:
+        if valid is True:
             guest_list = {}
             hl_count = 0
             ll_count = 0
@@ -54,17 +59,17 @@ def CompileGamestates(directory):
             gamestateCurrent['venue'] = timelineJSON['venue']
             gamestateCurrent['sniper'] = timelineJSON['sniper']
             gamestateCurrent['spy'] = timelineJSON['spy']
-            gamestateCurrent['guest_count'] = timelineJSON['guest_count']                    
+            gamestateCurrent['guest_count'] = timelineJSON['guest_count']
             gamestateCurrent['reqmissions'] = timelineJSON['game_type'][1]
             if timelineJSON['win_type'][1] == "SpyWin":
                 gamestateCurrent['result'] = 1
             elif timelineJSON['win_type'][1] == 'SniperWin':
-                gamestateCurrent['result'] = 0 
+                gamestateCurrent['result'] = 0
             countdown_start = -1
             bug_time = -1
             da_time = -1
             swap_time = -1
-            purloin_time = -1 ###Initializes all the "time since" trackers; these variables will be updated to the timestamp a mission is completed at, or when countdown is triggered.
+            purloin_time = -1  # Initializes all the "time since" trackers; these variables will be updated to the timestamp a mission is completed at, or when countdown is triggered.
             fp_time = -1
             inspect_time = -1
             micro_time = -1
@@ -80,7 +85,6 @@ def CompileGamestates(directory):
             timeadd_time = -1
             red_bb = -1
 
-            
             gamestateList = []
             for event in timelineList:
                 gamestateStart = gamestateCurrent
@@ -93,8 +97,7 @@ def CompileGamestates(directory):
                     pass
                 if category == 'Cast':
                     Cast(event, guest_list)
-                
- 
+
             for event in timelineList:
                 gamestateStart = gamestateCurrent
                 current_elapsed = event["elapsed_time"]
@@ -142,12 +145,12 @@ def CompileGamestates(directory):
                     pass
                 if category == 'MissionSelected' or category == 'MissionEnabled':
                     gamestateCurrent = MissionInitialize(event, gamestateCurrent, category)
-##                for x in range(int(prev_elapsed+1), int(current_elapsed), 5):
-##                    gamestateCurrent['elapsed'] = x
-##                    gamestateCurrent['spytime'] = int(prev_spytime + 1) - (x - int(prev_elapsed))
-##                    if gamestateCurrent['countdown'] == 1:
-##                        gamestateCurrent['countdown_elapsed'] = x - countdown_start
-##                    gamestateList.append(gamestateCurrent.copy())
+#                for x in range(int(prev_elapsed+1), int(current_elapsed), 5):
+#                    gamestateCurrent['elapsed'] = x
+#                    gamestateCurrent['spytime'] = int(prev_spytime + 1) - (x - int(prev_elapsed))
+#                    if gamestateCurrent['countdown'] == 1:
+#                        gamestateCurrent['countdown_elapsed'] = x - countdown_start
+#                    gamestateList.append(gamestateCurrent.copy())
                 if mission == 'Fingerprint':
                     gamestateCurrent, change_made, fp_time, print_time = FingerprintHandler(event, gamestateCurrent, fp_time, print_time)
                 elif mission == 'Bug':
@@ -178,7 +181,7 @@ def CompileGamestates(directory):
                 if change_made == 1:
                     gamestateCurrent['elapsed'] = event['elapsed_time']
                     gamestateCurrent['spytime'] = event['time']
-                    
+
                     gamestateList.append(gamestateCurrent.copy())
                 category = []
                 prev_elapsed = current_elapsed
@@ -189,10 +192,6 @@ def CompileGamestates(directory):
                     csv_writer.writerow(header)
                     count += 1
                 csv_writer.writerow(x.values())
-                
-            
-                
-                
     return
 
 
@@ -200,7 +199,7 @@ def CompileGamestatesToDataframe(file):
     gamestateList = []
 
     valid, timelineList, timelineJSON = GetTimeline(file)
-    if valid == True:
+    if valid is True:
         guest_list = {}
         hl_count = 0
         ll_count = 0
@@ -246,7 +245,6 @@ def CompileGamestatesToDataframe(file):
         timeadd_time = -1
         red_bb = -1
 
-        
         for event in timelineList:
             change_made = 0
             category = 0
@@ -254,8 +252,8 @@ def CompileGamestatesToDataframe(file):
             category3 = 0
             mission = event['mission']
             try:
-                category = event['category'][0]   ###Create a guest list before running through other events; 
-            except:                               ###done because sniper lights can sometimes occur before cast initializes  
+                category = event['category'][0]   ###Create a guest list before running through other events;
+            except:                               ###done because sniper lights can sometimes occur before cast initializes
                 pass
             if category == 'Cast':
                 Cast(event, guest_list)
@@ -311,7 +309,7 @@ def CompileGamestatesToDataframe(file):
                 category3 = event['category'][2]
             except:
                 pass
-            for x in range(int(prev_elapsed+1), int(current_elapsed), 1): 
+            for x in range(int(prev_elapsed+1), int(current_elapsed), 1):
                 gamestateCurrent['elapsed'] = x
                 gamestateCurrent['spytime'] = int(prev_spytime + 1) - (x - int(prev_elapsed)) ###Creates extra gamestate copies at set intervals between events for smoother gamestate structure over 1 game.
                 for y in time_since_dict:                                                       ###Usually used for smoothing casting prediction values, using it for training causes overfitting
@@ -354,7 +352,7 @@ def CompileGamestatesToDataframe(file):
                 countdown_start = event['elapsed_time']
             else:
                 gamestateCurrent, change_made, gamestateList = HoldingHandler(event, gamestateCurrent, gamestateList)
-                
+
             if change_made == 1:
                 gamestateCurrent['elapsed'] = event['elapsed_time']
                 gamestateCurrent['spytime'] = event['time']       ###This is where we add a gamestate to the list if there's been a copy.
@@ -365,7 +363,6 @@ def CompileGamestatesToDataframe(file):
         gamestateList.append(gamestateCurrent.copy())
     gamestates = pd.DataFrame(gamestateList) ###When compiling gamestates, this will append the list to a file. For casting purposes, this sends it straight to a dataframe.
     return gamestates
-
 
 
 def CompileFinalGamestates(directory):
@@ -419,7 +416,6 @@ def CompileFinalGamestates(directory):
             timeadd_time = -1
             red_bb = -1
 
-            
             for event in timelineList:
                 change_made = 0
                 category = 0
@@ -427,8 +423,8 @@ def CompileFinalGamestates(directory):
                 category3 = 0
                 mission = event['mission']
                 try:
-                    category = event['category'][0]   ###Create a guest list before running through other events; 
-                except:                               ###done because sniper lights can sometimes occur before cast initializes  
+                    category = event['category'][0]   ###Create a guest list before running through other events;
+                except:                               ###done because sniper lights can sometimes occur before cast initializes
                     pass
                 if category == 'Cast':
                     Cast(event, guest_list)
@@ -484,7 +480,7 @@ def CompileFinalGamestates(directory):
                     category3 = event['category'][2]
                 except:
                     pass
-                for x in range(int(prev_elapsed+1), int(current_elapsed), 1): 
+                for x in range(int(prev_elapsed+1), int(current_elapsed), 1):
                     gamestateCurrent['elapsed'] = x
                     gamestateCurrent['spytime'] = int(prev_spytime + 1) - (x - int(prev_elapsed)) ###Creates extra gamestate copies at set intervals between events for smoother gamestate structure over 1 game.
                     for y in time_since_dict:                                                       ###Usually used for smoothing casting prediction values, using it for training causes overfitting
@@ -527,7 +523,7 @@ def CompileFinalGamestates(directory):
                     countdown_start = event['elapsed_time']
                 else:
                     gamestateCurrent, change_made, gamestateList = HoldingHandler(event, gamestateCurrent, gamestateList)
-                    
+
                 #if change_made == 1:
                     #gamestateCurrent['elapsed'] = event['elapsed_time']
                     #gamestateCurrent['spytime'] = event['time']       ###This is where we add a gamestate to the list if there's been a copy.
@@ -555,7 +551,7 @@ def TimeaddHandler(event, gamestate, timeadd_time):
         change_made = 0
     gamestate['timeadd_count'] = timeadd_count
     gamestate['green_timeadds'] = green_timeadds
-    gamestate['red_timeadds'] = red_timeadds 
+    gamestate['red_timeadds'] = red_timeadds
     return gamestate, change_made, timeadd_time
 
 def HoldingHandler(event, gamestate, gamestateList):
@@ -598,6 +594,7 @@ def HoldingHandler(event, gamestate, gamestateList):
     gamestate['has_case'] = has_case
     gamestate['sips_count'] = sips
     return gamestate, change_made, gamestateList
+
 def LocationHandler(event, gamestate):
     eventstring = event['event']
     change_made = 1
@@ -618,6 +615,7 @@ def LocationHandler(event, gamestate):
         change_made = 0
     gamestate['spy_loc'] = spy_loc
     return gamestate, change_made
+
 def ContactHandler(event, gamestate, da_time, bb_time, red_bb):
     eventstring = event['event']
     change_made = 1
@@ -645,7 +643,7 @@ def ContactHandler(event, gamestate, da_time, bb_time, red_bb):
         change_made = 0
     gamestate['bb_count'] = bb_count
     gamestate['missions_da'] = contact_bool
-    gamestate['green_bbs'] = green_bbs 
+    gamestate['green_bbs'] = green_bbs
     gamestate['coughs'] = coughs
     return gamestate, change_made, da_time, bb_time, red_bb
 
@@ -669,6 +667,7 @@ def SwapHandler(event, gamestate, swap_time):
     gamestate['missions_swap'] = swap_bool
     gamestate['green_swap'] = green_swap
     return gamestate, change_made, swap_time
+
 def PurloinHandler(event, gamestate, purloin_time, delegate_time):
     eventstring = event['event']
     change_made = 1
@@ -731,6 +730,7 @@ def SeduceHandler(event, gamestate, seduce_time):
     gamestate['flirt_cd'] = seduce_cd
     gamestate['missions_seduce'] = seduce_bool
     return gamestate, change_made, seduce_time
+
 def TransferHandler(event, gamestate, micro_time, MFanim_time):
     eventstring = event['event']
     change_made = 1
@@ -751,6 +751,7 @@ def TransferHandler(event, gamestate, micro_time, MFanim_time):
     gamestate['micro_progress'] = micro_progress
     gamestate['missions_micro'] = micro_bool
     return gamestate, change_made, micro_time, MFanim_time
+
 def InspectHandler(event, gamestate, inspect_time, statue_time):
     eventstring = event['event']
     change_made = 1
@@ -768,6 +769,7 @@ def InspectHandler(event, gamestate, inspect_time, statue_time):
     gamestate['inspects'] = inspect_count
     gamestate['missions_inspect'] = inspect_bool
     return gamestate, change_made, inspect_time, statue_time
+
 def BugHandler(event, gamestate, bug_time, bugattempt_time):
     eventstring = event['event']
     change_made = 1
@@ -785,7 +787,6 @@ def BugHandler(event, gamestate, bug_time, bugattempt_time):
     gamestate['bugs_attempted'] = bug_attempts
     gamestate['missions_bug'] = bug_bool
     return gamestate, change_made, bug_time, bugattempt_time
-        
 
 def FingerprintHandler(event, gamestate, fp_time, print_time):
     eventstring = event['event']
@@ -825,10 +826,11 @@ def FingerprintHandler(event, gamestate, fp_time, print_time):
     gamestate['difficult_attempts'] = diff_attempts
     gamestate['difficults_succeeded'] = diffs_succeeded
     gamestate['book_prints'] = book_prints
-    gamestate['case_prints'] = case_prints 
+    gamestate['case_prints'] = case_prints
     gamestate['drink_prints'] = drink_prints
     gamestate['statue_prints'] = statue_prints
     return gamestate, change_made, fp_time, print_time
+
 def MissionInitialize(event, gamestate, category):
     missions_dict = {'Bug':['bug_avail', 'bug_selected'], 'Contact': ['da_avail', 'da_selected'], 'Swap': ['swap_avail', 'swap_selected'],
                      'Inspect':['inspect_avail', 'inspect_selected'], 'Seduce':['seduce_avail', 'seduce_selected'], 'Purloin':['purloin_avail', 'purloin_selected'],
@@ -963,13 +965,10 @@ def SniperLights(event, guest_list, gamestate, light_time, spy_light_change):
     gamestate['light'] = spy_light
     return guest_list, gamestate, change_made, spy_light_change, light_time
 
-
 def Cast(event, guest_list):
     if event["cast_name"][0] not in guest_list.keys():
         guest_data = [event['role'][0], 1]
         guest_list[event['cast_name'][0]] = guest_data
-        
-        
-    
+
 
 #CompileFinalGamestates('C:/Users/Aidan/Desktop/SpyPartyPredict/PAX_test_data/test_data')

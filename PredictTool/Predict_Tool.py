@@ -23,7 +23,6 @@ list_of_files = sorted(list_of_files,
                        key=lambda x: os.path.getmtime(x)
                        )
 for file in list_of_files:
-    input()
     print(file.name)
     PredictLive(file)
     os.remove(file)
